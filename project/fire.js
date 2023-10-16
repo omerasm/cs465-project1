@@ -12,6 +12,8 @@ var lastTriangleX = [];
 var lastTriangleY = [];
 var lastColorId;
 
+var color = 0;
+
 var redraw = false;
 
 var colors = [
@@ -81,7 +83,7 @@ window.onload = function init() {
             if (lastTriangleX[0] === verticeX[0] &&
               lastTriangleX[1] === verticeX[1] &&
               lastTriangleX[2] === verticeX[2] &&
-              lastColorId === color )
+              lastColorId === colorId )
             {
               return;
             }
@@ -94,11 +96,15 @@ window.onload = function init() {
               gl.bufferSubData(gl.ARRAY_BUFFER, 8*index, flatten(t));
 
               gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
-              t = vec4(colors[(index)%7]);
+              t = vec4(colors[colorId]);
               gl.bufferSubData(gl.ARRAY_BUFFER, 16*index, flatten(t));
               index++;
               
             }
+
+            lastTriangleX = verticeX;
+            lastTriangleY = verticeY;
+            lastColorId = colorId;
 
             console.log();
             console.log("*****************");
