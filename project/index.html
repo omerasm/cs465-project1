@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<link rel="stylesheet" href="styles.css">
+</head>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute vec4 vPosition;
+attribute vec4 vColor;
+
+varying vec4 fColor;
+
+void
+main()
+{
+    gl_Position = vPosition;
+    fColor = vColor;
+    gl_PointSize = 10.0;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+varying vec4 fColor;
+
+void
+main()
+{
+    gl_FragColor = fColor;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="fire.js"></script>
+
+<body>
+
+    <div class="toolbar">
+        <!-- Tool Selection -->
+        <button id="brush-tool">Brush</button>
+        <button id="eraser-tool">Eraser</button>
+        <button id="selection-tool">Select</button>
+        
+        <!-- Zoom Controls -->
+        <button id="zoom-in" style="font-size: 12pt;">&#128269; +</button>
+        <button id="zoom-out" style="font-size: 12pt;">&#128269; -</button>
+
+        <button id="undo">Undo</button>
+        <button id="redo">Redo</button>
+        
+        <!-- Other features as needed... -->
+    </div>
+
+    <canvas id="gl-canvas" width="960" height="540"></canvas>
+
+    <!-- Color Selection -->
+        <div class="color-picker">
+            <button id="red_color" class="color" style="background-color: red;" data-color="red"></button>
+            <button id="green_color" class="color" style="background-color: green;" data-color="green"></button>
+            <button id="blue_color" class="color" style="background-color: blue;" data-color="blue"></button>
+            <button id="white_color" class="color" style="background-color: white;" data-color="white"></button>
+            <button id="black_color" class="color" style="background-color: black;" data-color="black"></button>
+            <button id="yellow_color" class="color" style="background-color: yellow;" data-color="yellow"></button>
+            <!-- ... add other colors -->
+        </div>
+
+</body>
+</html>
