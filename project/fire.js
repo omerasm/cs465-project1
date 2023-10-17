@@ -3,9 +3,9 @@ var gl;
 
 
 var maxNumTriangles = 3000;
-var maxNumVertices  = 3 * maxNumTriangles;
-var index = 0;
+var maxNumVertices = 3 * maxNumTriangles;
 
+var index = 0;
 var lastTriangleX = [];
 var lastTriangleY = [];
 var lastColorId;
@@ -15,6 +15,32 @@ var redraw = false;
 
 const Mouse = { Brush: 0, Eraser: 1, Select: 2 };
 var mouse = Mouse.Brush;
+
+var undoTClone = [];
+var redoTClone = [];
+
+
+var vBuffer = [];
+var cBuffer = [];
+
+var allVertices = [];
+
+var indexHolder = [];
+var indexRedoer = [];
+
+var colorHolder = [];
+
+var fovy = 45.0;  // Field-of-view in Y direction angle (in degrees)
+var aspect = 1.0;       // Viewport aspect ratio
+var near = 0.3;
+var far = 3.0;
+var radius = 4.0;
+var theta = 0.0;
+var phi = 0.0;
+var dr = 5.0 * Math.PI / 180.0;
+
+var modelViewMatrix
+var modelViewMatrixLoc
 
 var colors = [
     vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
@@ -39,26 +65,91 @@ function buttonSelect() {
 
 function buttonBlack() {
     colorId = 0;
+    if (colorHolder[colorHolder.length - 1] != colorId) {
+        colorHolder.push(colorId);
+    }
+    
+    console.log(colorHolder.length);
 }
 
 function buttonRed() {
     colorId = 1;
+    colorHolder.push(colorId);
 }
 
 function buttonYellow() {
     colorId = 2;
+    colorHolder.push(colorId);
 }
 
 function buttonGreen() {
     colorId = 3;
+    colorHolder.push(colorId);
 }
 
 function buttonBlue() {
     colorId = 4;
+    colorHolder.push(colorId);
 }
 
 function buttonMagenta() {
     colorId = 5;
+    colorHolder.push(colorId);
+}
+
+function saveState() {
+    var tClone = deepClone(allVertices);
+    undoTClone.push(tClone);
+    indexHolder.push(index);
+    redoTClone = [];
+}
+function undo_op() {
+    index = 0;
+    if (undoTClone.length > 0 && undoTClone.length < 10) {
+        var temp = indexHolder.pop();
+        indexRedoer.push(temp);
+        if (indexHolder.length > 0) {
+            index = indexHolder[indexHolder.length - 1];
+        }
+        var popped = deepClone(undoTClone.pop());
+        console.log(index)
+        redoTClone.push(popped);
+
+    }
+
+}
+
+function deepClone(clown) {
+    var deepCopy = [];
+    for (let i = 0; i < clown.length; i++) {
+        deepCopy[i] = clown[i].slice();
+    }
+    return deepCopy;
+}
+
+function redo_op() {
+    if (redoTClone.length > 0) {
+        var colorChanger = 0
+        index = 0;
+        var pushed = deepClone(redoTClone.pop());
+        undoTClone.push(pushed);
+        lengthPushed = pushed.length;
+
+        for (let i = 0; i < lengthPushed; i++) {
+            if (i * 3 >= indexRedoer[i]) {
+
+            }
+            var vertices = pushed.pop();
+            draw(vertices[0], vertices[1]);
+        }
+        index = indexRedoer.pop();
+        indexHolder.push(index);
+        console.log(index);
+    }
+}
+
+function zoom_in(){
+    fovy = fovy
 }
 
 window.onload = function init() {
@@ -66,14 +157,16 @@ window.onload = function init() {
     canvas = document.getElementById( "gl-canvas" ); 
 
     gl = WebGLUtils.setupWebGL( canvas );
-    if ( !gl ) { alert( "WebGL isn't available" ); }
+    if (!gl) { alert("WebGL isn't available"); }
 
+    colorHolder.push(0);
     canvas.addEventListener("mousedown", function(event){
       redraw = true;
     });
 
     canvas.addEventListener("mouseup", function(event){
-      redraw = false;
+        redraw = false;
+        saveState();
     });
     //canvas.addEventListener("mousedown", function(){
     canvas.addEventListener("mousemove", function(event){
@@ -117,22 +210,15 @@ window.onload = function init() {
               return;
             }
             
-            for (var i = 0; i < 3; i++) {
-              gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-              var t = vec2(2*verticeX[i]/canvas.width-1,
-              2*(canvas.height-verticeY[i])/canvas.height-1);
-              gl.bufferSubData(gl.ARRAY_BUFFER, 8*index, flatten(t));
-
-              gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
-              t = vec4(colors[colorId]);
-              gl.bufferSubData(gl.ARRAY_BUFFER, 16*index, flatten(t));
-              index++;
-            }
+              draw(verticeX, verticeY);
+              var vertice = [verticeX, verticeY];
+              allVertices.push(vertice);
+              
 
             lastTriangleX = verticeX;
             lastTriangleY = verticeY;
             lastColorId = colorId;
-          }
+        }
 
     } );
 
@@ -148,7 +234,7 @@ window.onload = function init() {
     gl.useProgram( program );
 
 
-    var vBuffer = gl.createBuffer();
+    vBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer);
     gl.bufferData( gl.ARRAY_BUFFER, 8*maxNumVertices, gl.STATIC_DRAW );
 
@@ -156,13 +242,15 @@ window.onload = function init() {
     gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
 
-    var cBuffer = gl.createBuffer();
+    cBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, 16*maxNumVertices, gl.STATIC_DRAW );
 
     var vColor = gl.getAttribLocation( program, "vColor" );
     gl.vertexAttribPointer( vColor, 4, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( vColor );
+    gl.enableVertexAttribArray(vColor);
+
+    projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
 
     render();
 
@@ -176,4 +264,27 @@ function render() {
 
     window.requestAnimFrame(render);
 
+}
+
+function draw(verticeX, verticeY) {
+    for (var i = 0; i < 3; i++) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+        var t = vec2(2 * verticeX[i] / canvas.width - 1,
+            2 * (canvas.height - verticeY[i]) / canvas.height - 1);
+        gl.bufferSubData(gl.ARRAY_BUFFER, 8 * index, flatten(t));
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
+        t = vec4(colors[colorId]);
+        gl.bufferSubData(gl.ARRAY_BUFFER, 16 * index, flatten(t));
+        index++;
+    }
+}
+
+function zoomer() {
+    //gl.clear(gl.COLOR_BUFFER_BIT);
+
+    //projectionMatrix = perspective(60, aspect, near, far);
+
+    //gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
+    //requestAnimFrame(render);
 }
