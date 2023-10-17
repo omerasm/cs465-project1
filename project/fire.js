@@ -1,10 +1,7 @@
-
-
 var canvas;
 var gl;
 
-
-var maxNumTriangles = 300;
+var maxNumTriangles = 1000;
 var maxNumVertices  = 3 * maxNumTriangles;
 var index = 0;
 
@@ -15,6 +12,9 @@ var colorId = 0;
 
 var redraw = false;
 
+const Mouse = { Brush: 0, Eraser: 1, Select: 2 };
+var mouse = Mouse.Brush;
+
 var colors = [
     vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
     vec4( 1.0, 0.0, 0.0, 1.0 ),  // red
@@ -23,6 +23,18 @@ var colors = [
     vec4( 0.0, 0.0, 1.0, 1.0 ),  // blue
     vec4( 1.0, 0.0, 1.0, 1.0 ),  // magenta
 ];
+
+function buttonBrush() {
+  mouse = Mouse.Brush
+}
+
+function buttonEraser() {
+  mouse = Mouse.Eraser
+}
+
+function buttonSelect() {
+  mouse = Mouse.Select
+}
 
 function buttonBlack() {
     colorId = 0;
@@ -48,9 +60,7 @@ function buttonMagenta() {
     colorId = 5;
 }
 
-
 window.onload = function init() {
-
 
     canvas = document.getElementById( "gl-canvas" ); 
 
@@ -67,25 +77,18 @@ window.onload = function init() {
     //canvas.addEventListener("mousedown", function(){
     canvas.addEventListener("mousemove", function(event){
 
-          if(redraw) {
-
+          if(redraw && mouse === Mouse.Brush) {
             const rect = canvas.getBoundingClientRect();
-            // center of the square we are in
-
             var reloX = event.clientX - rect.left;
             var reloY = event.clientY - rect.top;
-
             var squareX = reloX - (reloX%20) + 10;
             var squareY = reloY - (reloY%20) + 10;
-
             var verticeX = [];
             var verticeY = [];
-
             verticeX.push(squareX);
             verticeY.push(squareY);
 
-            if (reloX - reloY > squareX - squareY) 
-            {
+            if (reloX - reloY > squareX - squareY) {
               // up/right
               verticeX.push(squareX + 10);
               verticeY.push(squareY - 10);
@@ -95,8 +98,7 @@ window.onload = function init() {
               verticeX.push(squareX - 10);
               verticeY.push(squareY + 10);
             }
-            if (reloX + reloY > squareX + squareY)
-            {
+            if (reloX + reloY > squareX + squareY) {
               // right/down
               verticeX.push(squareX + 10);
               verticeY.push(squareY + 10);
@@ -110,13 +112,11 @@ window.onload = function init() {
             if (lastTriangleX[0] === verticeX[0] &&
               lastTriangleX[1] === verticeX[1] &&
               lastTriangleX[2] === verticeX[2] &&
-              lastColorId === colorId )
-            {
+              lastColorId === colorId ) {
               return;
             }
             
             for (var i = 0; i < 3; i++) {
-              
               gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
               var t = vec2(2*verticeX[i]/canvas.width-1,
               2*(canvas.height-verticeY[i])/canvas.height-1);
@@ -131,7 +131,6 @@ window.onload = function init() {
             lastTriangleX = verticeX;
             lastTriangleY = verticeY;
             lastColorId = colorId;
-
           }
 
     } );
