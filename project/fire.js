@@ -1,16 +1,22 @@
 var canvas;
 var gl;
 
-<<<<<<< Updated upstream
-
-var maxNumTriangles = 30000;
-=======
 var maxNumTriangles = 3000;
->>>>>>> Stashed changes
 var maxNumVertices = 3 * maxNumTriangles;
 
 var selectStartX;
 var selectStartY;
+var selectEndX;
+var selectEndY;
+
+var selectionMade = false;
+
+var indexrez;
+
+var dragStartX;
+var dragStartY;
+var dragEndX;
+var dragEndY;
 
 var index = 0;
 var lastTriangleX = [];
@@ -62,15 +68,18 @@ var colors = [
 ];
 
 function buttonBrush() {
-  mouse = Mouse.Brush
+  mouse = Mouse.Brush;
+  selectionMade = false;
 }
 
 function buttonEraser() {
-  mouse = Mouse.Eraser
+  mouse = Mouse.Eraser;
+  selectionMade = false;
 }
 
 function buttonSelect() {
-  mouse = Mouse.Select
+  mouse = Mouse.Select;
+  selectionMade = false;
 }
 
 function buttonBlack() {
@@ -199,15 +208,74 @@ window.onload = function init() {
 
     canvas.addEventListener("mousedown", function(event){
       redraw = true;
-      mouseDownX = event.clientX;
-      mouseDownY = event.clientY;
-      
+      if(mouse === Mouse.Select) {
+        if (!selectionMade) {
+          selectStartX = event.clientX;
+          selectStartY = event.clientY;
+        }
+        else {
+          dragStartX = event.clientX;
+          dragStartY = event.clientY;
+        }
+      }
     });
 
     canvas.addEventListener("mouseup", function(event){
         redraw = false;
         saveState();
-        //line_index = 0;
+        if(mouse === Mouse.Select) {
+          selectEndX = event.clientX;
+          selectEndY = event.clientY;
+
+          // find square center
+          const rect = canvas.getBoundingClientRect();
+          var reloX = selectEndX - rect.left;
+          var reloY = selectEndY - rect.top;
+          //var squareX = reloX - (reloX%20) + 10;
+          //var squareY = reloY - (reloY%20) + 10;
+
+          var normalStartX = 2*(selectStartX - rect.left)/canvas.width-1;
+          var normalStartY = 2*(canvas.height-(selectStartY - rect.top))/canvas.height-1;
+          
+          var normalEndX = 2*(selectEndX - rect.left)/canvas.width-1;
+          var normalEndY = 2*(canvas.height-(selectEndY - rect.top))/canvas.height-1;
+
+          maxX = Math.max(normalStartX,normalEndX);
+          maxY = Math.max(normalStartY,normalEndY);
+          minX = Math.min(normalStartX,normalEndX);
+          minY = Math.min(normalStartY,normalEndY);
+
+          indexrez = index;
+
+              // copied from eraser part
+              for ( var i = 0; i < indexrez / 3; i+=1 ) {
+                gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+                var oldTri = new Float32Array(6);
+                gl.getBufferSubData(gl.ARRAY_BUFFER, 24*i, oldTri, 0);
+                for ( var j = 0; j < 3; j++ ) {
+
+                  if ( oldTri[2*j] < maxX && oldTri[2*j] > minX && oldTri[2*j+1] > minY && oldTri[2*j+1] < maxY ) {
+                    // triangle is INNNN BABY
+                    gl.bufferSubData(gl.ARRAY_BUFFER, 24*i, flatten([0,0,0,0,0,0]));
+
+                    var oldTriColor = new Float32Array(12);
+                    gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
+                    gl.getBufferSubData(gl.ARRAY_BUFFER, 48*i, oldTriColor, 0);
+                    gl.bufferSubData(gl.ARRAY_BUFFER, 48*i, flatten([0,0,0,0,0,0,0,0,0,0,0,0]));
+
+                    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+                    gl.bufferSubData(gl.ARRAY_BUFFER, 8*index, oldTri);
+                    gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
+                    gl.bufferSubData(gl.ARRAY_BUFFER, 16*index, oldTriColor);
+                    index += 3;
+                    selectionMade = true;
+                    console.log("here");
+                    break;
+                  }
+                }
+              }
+              //
+            }
     });
     indexHolder.push(0);
     colorHolder.push(0);
@@ -215,9 +283,27 @@ window.onload = function init() {
     //canvas.addEventListener("mousedown", function(){
     canvas.addEventListener("mousemove", function(event){
 
-          if(redraw && mouse === Mouse.Brush) {
+          if ( selectionMade && mouse === Mouse.Select ) {
+            dragEndX = event.clientX;
+            dragEndY = event.clientY;
 
-            var [verticeX, verticeY] = getTriangle(event);
+            dragUnitX = (dragEndX - dragStartX) / 20;
+            dragUnitY = (dragEndY - dragStartY) / 20;
+
+            // indexrez'den itibaren olan ucgenlerin hepsi otelencek
+            gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+            for ( var curpt = indexrez; curpt < index; curpt += 1 ) {
+              var vec = new Float32Array(2);
+              gl.getBufferSubData(gl.ARRAY_BUFFER, 8*curpt, vec, 0);
+              vec[0] += dragUnitX*20;
+              vec[1] += dragUnitY*20;
+              gl.bufferSubData(gl.ARRAY_BUFFER, 8*curpt, vec);
+            }
+            
+            
+          }
+          else if(redraw && mouse === Mouse.Brush) {
+            var [verticeX, verticeY] = getTriangle(event.clientX,event.clientY);
             // burasi brush eraser arasi switchlerken bozabilir ama ayarlarizzz 
             if (lastTriangleX[0] === verticeX[0] &&
               lastTriangleX[1] === verticeX[1] &&
@@ -240,7 +326,7 @@ window.onload = function init() {
           }
           else if(redraw && mouse === Mouse.Eraser) {
             var diff;
-            var [verticeX, verticeY] = getTriangle(event);
+            var [verticeX, verticeY] = getTriangle(event.clientX,event.clientY);
             if (lastTriangleX[0] === verticeX[0] &&
               lastTriangleX[1] === verticeX[1] &&
               lastTriangleX[2] === verticeX[2] &&
@@ -274,19 +360,6 @@ window.onload = function init() {
                 gl.bufferSubData(gl.ARRAY_BUFFER, 48*i, flatten([0,0,0,0,0,0,0,0,0,0,0,0]));
               }
             }
-          }
-          else if(redraw && mouse === Mouse.Select) {                                                     // HERE
-            var mouseDown = new Float32Array(4);
-            mouseDown[0] = mouseDownX;
-            mouseDown[1] = mouseDownY;
-            var mouseCur = new Float32Array(2);
-            mouseDown[2] = event.clientX;
-            mouseDown[3] = event.clientY;
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-            gl.bufferSubData(gl.ARRAY_BUFFER, 8*(maxNumVertices + line_index), flatten(mouseDown));
-
-            line_index++;
           }
     } );
 
@@ -353,10 +426,11 @@ function zoomer() {
     //requestAnimFrame(render);
 }
 
-function getTriangle(event) {
+function getTriangle(inputX,inputY) {
+            
             const rect = canvas.getBoundingClientRect();
-            var reloX = event.clientX - rect.left;
-            var reloY = event.clientY - rect.top;
+            var reloX = inputX - rect.left;
+            var reloY = inputY - rect.top;
             var squareX = reloX - (reloX%20) + 10;
             var squareY = reloY - (reloY%20) + 10;
             var verticeX = [];
