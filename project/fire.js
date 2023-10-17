@@ -2,7 +2,7 @@ var canvas;
 var gl;
 
 
-var maxNumTriangles = 3000;
+var maxNumTriangles = 30000;
 var maxNumVertices = 3 * maxNumTriangles;
 
 var index = 0;
@@ -30,6 +30,7 @@ var indexHolder = [];
 var indexRedoer = [];
 
 var colorHolder = [];
+var colorChanger = 0;
 
 var fovy = 45.0;  // Field-of-view in Y direction angle (in degrees)
 var aspect = 1.0;       // Viewport aspect ratio
@@ -42,6 +43,7 @@ var dr = 5.0 * Math.PI / 180.0;
 
 var modelViewMatrix
 var modelViewMatrixLoc
+
 
 var colors = [
     vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
@@ -70,32 +72,41 @@ function buttonBlack() {
         colorHolder.push(colorId);
     }
     
-    console.log(colorHolder.length);
 }
 
 function buttonRed() {
     colorId = 1;
-    colorHolder.push(colorId);
+    if (colorHolder[colorHolder.length - 1] != colorId) {
+        colorHolder.push(colorId);
+    }
 }
 
 function buttonYellow() {
     colorId = 2;
-    colorHolder.push(colorId);
+    if (colorHolder[colorHolder.length - 1] != colorId) {
+        colorHolder.push(colorId);
+    }
 }
 
 function buttonGreen() {
     colorId = 3;
-    colorHolder.push(colorId);
+    if (colorHolder[colorHolder.length - 1] != colorId) {
+        colorHolder.push(colorId);
+    }
 }
 
 function buttonBlue() {
     colorId = 4;
-    colorHolder.push(colorId);
+    if (colorHolder[colorHolder.length - 1] != colorId) {
+        colorHolder.push(colorId);
+    }
 }
 
 function buttonMagenta() {
     colorId = 5;
-    colorHolder.push(colorId);
+    if (colorHolder[colorHolder.length - 1] != colorId) {
+        colorHolder.push(colorId);
+    }
 }
 
 function saveState() {
@@ -103,18 +114,34 @@ function saveState() {
     undoTClone.push(tClone);
     indexHolder.push(index);
     redoTClone = [];
+    console.log("save state: ", index)
 }
 function undo_op() {
     index = 0;
     if (undoTClone.length > 0 && undoTClone.length < 10) {
         var temp = indexHolder.pop();
         indexRedoer.push(temp);
+        console.log(indexRedoer);
+
+        var cloneTemp = undoTClone.pop()
+        var popped = deepClone(cloneTemp);
+        redoTClone.push(popped);
+        lengthPopped = popped.length;
+        colorChanger = 0;
+        colorId = colorHolder[0];
+        for (let i = 0; i < lengthPopped; i++) {
+            console.log(i, colorChanger, colorHolder, indexHolder[colorChanger])
+            if ((i * 3 >= indexHolder[colorChanger+1]) && (colorChanger < colorHolder.length)) {
+                colorChanger++;
+                colorId = colorHolder[colorChanger];
+            }
+            var vertices = popped[i];
+            draw(vertices[0], vertices[1]);
+        }
+
         if (indexHolder.length > 0) {
             index = indexHolder[indexHolder.length - 1];
         }
-        var popped = deepClone(undoTClone.pop());
-        console.log(index)
-        redoTClone.push(popped);
 
     }
 
@@ -129,18 +156,21 @@ function deepClone(clown) {
 }
 
 function redo_op() {
+    colorId = colorHolder[0];
     if (redoTClone.length > 0) {
-        var colorChanger = 0
+        colorChanger = 0
         index = 0;
         var pushed = deepClone(redoTClone.pop());
         undoTClone.push(pushed);
         lengthPushed = pushed.length;
-
+        colorId = colorHolder[0];
         for (let i = 0; i < lengthPushed; i++) {
-            if (i * 3 >= indexRedoer[i]) {
-
+            console.log(i, colorChanger, colorHolder, indexHolder[colorChanger] )
+            if ((i*3 >= indexHolder[colorChanger+1]) && (colorChanger < colorHolder.length)) {
+                colorChanger++;
+                colorId = colorHolder[colorChanger];
             }
-            var vertices = pushed.pop();
+            var vertices = pushed[i];
             draw(vertices[0], vertices[1]);
         }
         index = indexRedoer.pop();
@@ -160,7 +190,6 @@ window.onload = function init() {
     gl = WebGLUtils.setupWebGL( canvas );
     if (!gl) { alert("WebGL isn't available"); }
 
-    colorHolder.push(0);
     canvas.addEventListener("mousedown", function(event){
       redraw = true;
     });
@@ -169,6 +198,9 @@ window.onload = function init() {
         redraw = false;
         saveState();
     });
+    indexHolder.push(0);
+    colorHolder.push(0);
+
     //canvas.addEventListener("mousedown", function(){
     canvas.addEventListener("mousemove", function(event){
 
@@ -186,7 +218,6 @@ window.onload = function init() {
               lastMouse === Mouse.Brush ) {
               return;
             }
-            
               draw(verticeX, verticeY);
               var vertice = [verticeX, verticeY];
               allVertices.push(vertice);
