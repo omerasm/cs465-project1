@@ -1,12 +1,8 @@
 var canvas;
 var gl;
 
-<<<<<<< Updated upstream
-var maxNumTriangles = 1000;
-=======
 
 var maxNumTriangles = 3000;
->>>>>>> Stashed changes
 var maxNumVertices  = 3 * maxNumTriangles;
 var index = 0;
 
