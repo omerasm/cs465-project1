@@ -57,6 +57,82 @@ var dr = 5.0 * Math.PI / 180.0;
 var modelViewMatrix;
 var modelViewMatrixLoc;
 
+var layer1 = [];
+var layer2 = [];
+var layer3 = [];
+
+var layer1 = 1;
+var layer2 = 2;
+var layer3 = 3;
+
+var chosenOne = 1;
+
+function layer_1() {
+    chosenOne = 1;
+}
+
+function layer_2() {
+    chosenOne = 2;
+}
+
+function layer_3() {
+    chosenOne = 3;
+}
+
+function up_arrow() {
+
+    switch (chosenOne) {
+        case 1:
+            if (layer1 != 3) {
+                layer1++;
+                if (layer1 == layer2) { layer2--; }
+                else { layer3--; }
+            }
+            break;
+        case 2:
+            if (layer2 != 3) {
+                layer2++;
+                if (layer1 == layer2) { layer1--; }
+                else { layer3--; }
+            }
+            break;
+        case 3:
+            if (layer3 != 3) {
+                layer3++;
+                if (layer3 == layer2) { layer2--; }
+                else { layer1--; }
+            }
+            break;
+    }
+}
+
+function down_arrow() {
+
+    switch (chosenOne) {
+        case 1:
+            if (layer1 != 1) {
+                layer1--;
+                if (layer1 == layer2) { layer2++; }
+                else { layer3++; }
+            }
+            break;
+        case 2:
+            if (layer2 != 1) {
+                layer2--;
+                if (layer1 == layer2) { layer1++; }
+                else { layer3++; }
+            }
+            break;
+        case 3:
+            if (layer3 != 1) {
+                layer3--;
+                if (layer3 == layer2) { layer2++; }
+                else { layer1++; }
+            }
+            break;
+    }
+}
+
 
 var colors = [
     vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
@@ -130,15 +206,12 @@ function saveState() {
     undoTClone.push(tClone);
     indexHolder.push(index);
     redoTClone = [];
-    console.log("save state: ", index)
 }
 function undo_op() {
-    index = 0;
     if (undoTClone.length > 0 && undoTClone.length < 10) {
         var temp = indexHolder.pop();
         indexRedoer.push(temp);
-        console.log(indexRedoer);
-
+        index = 0;
         var cloneTemp = undoTClone.pop()
         var popped = deepClone(cloneTemp);
         redoTClone.push(popped);
@@ -146,7 +219,6 @@ function undo_op() {
         colorChanger = 0;
         colorId = colorHolder[0];
         for (let i = 0; i < lengthPopped; i++) {
-            console.log(i, colorChanger, colorHolder, indexHolder[colorChanger])
             if ((i * 3 >= indexHolder[colorChanger+1]) && (colorChanger < colorHolder.length)) {
                 colorChanger++;
                 colorId = colorHolder[colorChanger];
@@ -181,7 +253,6 @@ function redo_op() {
         lengthPushed = pushed.length;
         colorId = colorHolder[0];
         for (let i = 0; i < lengthPushed; i++) {
-            console.log(i, colorChanger, colorHolder, indexHolder[colorChanger] )
             if ((i*3 >= indexHolder[colorChanger+1]) && (colorChanger < colorHolder.length)) {
                 colorChanger++;
                 colorId = colorHolder[colorChanger];
@@ -191,7 +262,6 @@ function redo_op() {
         }
         index = indexRedoer.pop();
         indexHolder.push(index);
-        console.log(index);
     }
 }
 

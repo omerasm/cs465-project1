@@ -12,7 +12,9 @@ body {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
-    align-self: normal;
+    align-self: center;
+    align-items: baseline;
+    margin-left: 180px;
 }
 
 .color-picker {
@@ -20,6 +22,7 @@ body {
     align-items: center;
     flex-direction: column;
     gap: 5px;
+    margin-right: 150px;
 }
 
 .color {
@@ -28,6 +31,22 @@ body {
     width: 50px;
     height: 96.2px;
     cursor: pointer;
+}
+
+.updown {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin-right: 20px;
+    gap: 5px;
+}
+
+.layers {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin-right: 20px;
+    gap: 5px;
 }
 
 .axis {
