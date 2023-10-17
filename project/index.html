@@ -44,14 +44,14 @@ main()
     <div class="main">
         <div class="toolbar">
 
-            <!-- Tool Selection -->
-            <button onclick="buttonBrush()" id="brush-tool">Brush</button>
-            <button onclick="buttonEraser()" id="eraser-tool">Eraser</button>
-            <button onclick="buttonSelect()" id="selection-tool">Select</button>
-
-            <!-- Zoom Controls -->
-            <button onclick="zoomer()" id="zoom-in">&#128269; +</button>
-            <button id="zoom-out">&#128269; -</button>
+        <!-- Tool Selection -->
+        <button onclick="buttonBrush()" id="brush-tool">Brush</button>
+        <button onclick="buttonEraser()" id="eraser-tool">Eraser</button>
+        <button onclick="buttonSelect()" id="selection-tool">Select</button>
+        
+        <!-- Zoom Controls -->
+        <button onclick="zoomer()" id="zoom-in" style="font-size: 12pt;">&#128269; +</button>
+        <button id="zoom-out" style="font-size: 12pt;">&#128269; -</button>
 
 
             <button onclick="undo_op()" id="undo">Undo</button>
@@ -60,19 +60,7 @@ main()
             <!-- Other features as needed... -->
         </div>
 
-
         <div class="axis">
-
-            <div class="updown">
-                <button onclick="up_arrow()" id="up_arrow">&#x2191; </button>
-                <button onclick="down_arrow()" id="down_arrow">&#x2193; </button>
-            </div>
-            <div class="layers">
-                <button onclick="layer_1()" id="layer_1">Layer 1</button>
-                <button onclick="layer_2()" id="layer_2">Layer 2</button>
-                <button onclick="layer_3()" id="layer_3">Layer 3</button>
-            </div>
-
             <canvas id="gl-canvas" width="600" height="600"></canvas>
 
             <!-- Color Selection -->

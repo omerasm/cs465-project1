@@ -39,16 +39,6 @@ var cBuffer = [];
 
 var allVertices = [];
 
-var layer1 = [];
-var layer2 = [];
-var layer3 = [];
-
-var layer1 = 1;
-var layer2 = 2;
-var layer3 = 3;
-
-var chosenOne = 1;
-
 var indexHolder = [];
 var indexRedoer = [];
 
@@ -135,98 +125,29 @@ function buttonMagenta() {
     }
 }
 
-function layer_1() {
-    chosenOne = 1;
-}
-
-function layer_2() {
-    chosenOne = 2;
-}
-
-function layer_3() {
-    chosenOne = 3;
-}
-
-function up_arrow() {
-
-    switch (chosenOne) {
-        case 1:
-            if (layer1 != 3) {
-                layer1++;
-                if (layer1 == layer2) { layer2--; }
-                else { layer3--; }
-            }
-            break;
-        case 2:
-            if (layer2 != 3) {
-                layer2++;
-                if (layer1 == layer2) { layer1--; }
-                else { layer3--; }
-            }
-            break;
-        case 3:
-            if (layer3 != 3) {
-                layer3++;
-                if (layer3 == layer2) { layer2--; }
-                else { layer1--; }
-            }
-            break;
-    }
-}
-
-function down_arrow() {
-
-    switch (chosenOne) {
-        case 1:
-            if (layer1 != 1) {
-                layer1--;
-                if (layer1 == layer2) { layer2++; }
-                else { layer3++; }
-            }
-            break;
-        case 2:
-            if (layer2 != 1) {
-                layer2--;
-                if (layer1 == layer2) { layer1++; }
-                else { layer3++; }
-            }
-            break;
-        case 3:
-            if (layer3 != 1) {
-                layer3--;
-                if (layer3 == layer2) { layer2++; }
-                else { layer1++; }
-            }
-            break;
-    }
-}
-
-
-
-
 function saveState() {
     var tClone = deepClone(allVertices);
     undoTClone.push(tClone);
     indexHolder.push(index);
     redoTClone = [];
     console.log("save state: ", index)
-    console.log("redo" ,redoTClone)
 }
 function undo_op() {
-    if (undoTClone.length > 0) {
-        index = 0;
+    index = 0;
+    if (undoTClone.length > 0 && undoTClone.length < 10) {
         var temp = indexHolder.pop();
         indexRedoer.push(temp);
+        console.log(indexRedoer);
 
-        var cloneTemp = undoTClone.pop();
+        var cloneTemp = undoTClone.pop()
         var popped = deepClone(cloneTemp);
         redoTClone.push(popped);
-        allVertices = deepClone(undoTClone[undoTClone.length - 1]);
         lengthPopped = popped.length;
         colorChanger = 0;
         colorId = colorHolder[0];
         for (let i = 0; i < lengthPopped; i++) {
-            if ((i * 3 >= indexHolder[colorChanger+1]) && (colorChanger + 1 < colorHolder.length)) {
+            console.log(i, colorChanger, colorHolder, indexHolder[colorChanger])
+            if ((i * 3 >= indexHolder[colorChanger+1]) && (colorChanger < colorHolder.length)) {
                 colorChanger++;
                 colorId = colorHolder[colorChanger];
             }
@@ -257,10 +178,10 @@ function redo_op() {
         index = 0;
         var pushed = deepClone(redoTClone.pop());
         undoTClone.push(pushed);
-        allVertices = deepClone(undoTClone[undoTClone.length - 1]);
         lengthPushed = pushed.length;
         colorId = colorHolder[0];
         for (let i = 0; i < lengthPushed; i++) {
+            console.log(i, colorChanger, colorHolder, indexHolder[colorChanger] )
             if ((i*3 >= indexHolder[colorChanger+1]) && (colorChanger < colorHolder.length)) {
                 colorChanger++;
                 colorId = colorHolder[colorChanger];
@@ -270,6 +191,7 @@ function redo_op() {
         }
         index = indexRedoer.pop();
         indexHolder.push(index);
+        console.log(index);
     }
 }
 
@@ -298,9 +220,9 @@ window.onload = function init() {
       }
     });
 
-    canvas.addEventListener("mouseup", function (event) {
+    canvas.addEventListener("mouseup", function(event){
+        redraw = false;
         saveState();
-<<<<<<< Updated upstream
         if(mouse === Mouse.Select) {
           selectEndX = event.clientX;
           selectEndY = event.clientY;
@@ -354,7 +276,6 @@ window.onload = function init() {
               }
               //
             }
-        redraw = false;
     });
     indexHolder.push(0);
     colorHolder.push(0);
@@ -393,12 +314,10 @@ window.onload = function init() {
               lastColorId === colorId &&
               lastMouse === Mouse.Brush ) {
               return;
-              }
-
+            }
+              draw(verticeX, verticeY);
               var vertice = [verticeX, verticeY];
               allVertices.push(vertice);
-              draw(verticeX, verticeY);
-
               
             lastTriangleX = verticeX;
             lastTriangleY = verticeY;
