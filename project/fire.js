@@ -9,6 +9,7 @@ var index = 0;
 var lastTriangleX = [];
 var lastTriangleY = [];
 var lastColorId;
+var lastMouse;
 var colorId = 0;
 
 var redraw = false;
@@ -172,54 +173,85 @@ window.onload = function init() {
     canvas.addEventListener("mousemove", function(event){
 
           if(redraw && mouse === Mouse.Brush) {
-            const rect = canvas.getBoundingClientRect();
-            var reloX = event.clientX - rect.left;
-            var reloY = event.clientY - rect.top;
-            var squareX = reloX - (reloX%20) + 10;
-            var squareY = reloY - (reloY%20) + 10;
-            var verticeX = [];
-            var verticeY = [];
-            verticeX.push(squareX);
-            verticeY.push(squareY);
 
-            if (reloX - reloY > squareX - squareY) {
-              // up/right
-              verticeX.push(squareX + 10);
-              verticeY.push(squareY - 10);
-            }
-            else {
-              // down/left
-              verticeX.push(squareX - 10);
-              verticeY.push(squareY + 10);
-            }
-            if (reloX + reloY > squareX + squareY) {
-              // right/down
-              verticeX.push(squareX + 10);
-              verticeY.push(squareY + 10);
-            }
-            else {
-              // up/left
-              verticeX.push(squareX - 10);
-              verticeY.push(squareY - 10);
-            }
-
+            var [verticeX, verticeY] = getTriangle(event);
+            // burasi brush eraser arasi switchlerken bozabilir ama ayarlarizzz 
             if (lastTriangleX[0] === verticeX[0] &&
               lastTriangleX[1] === verticeX[1] &&
               lastTriangleX[2] === verticeX[2] &&
-              lastColorId === colorId ) {
+              lastTriangleY[0] === verticeY[0] &&
+              lastTriangleY[1] === verticeY[1] &&
+              lastTriangleY[2] === verticeY[2] &&
+              lastColorId === colorId &&
+              lastMouse === Mouse.Brush ) {
               return;
             }
             
+<<<<<<< Updated upstream
               draw(verticeX, verticeY);
               var vertice = [verticeX, verticeY];
               allVertices.push(vertice);
               
+=======
+            for (var i = 0; i < 3; i++) {
+              gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+              var t = vec2(2*verticeX[i]/canvas.width-1,
+              2*(canvas.height-verticeY[i])/canvas.height-1);
+              gl.bufferSubData(gl.ARRAY_BUFFER, 8*index, flatten(t));
+              gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
+              t = vec4(colors[colorId]);
+              gl.bufferSubData(gl.ARRAY_BUFFER, 16*index, flatten(t));
+              index++;
+            }
+>>>>>>> Stashed changes
 
             lastTriangleX = verticeX;
             lastTriangleY = verticeY;
             lastColorId = colorId;
+<<<<<<< Updated upstream
         }
 
+=======
+            lastMouse = Mouse.Brush;
+          }
+          else if(redraw && mouse === Mouse.Eraser) {
+            var diff;
+            var [verticeX, verticeY] = getTriangle(event);
+            if (lastTriangleX[0] === verticeX[0] &&
+              lastTriangleX[1] === verticeX[1] &&
+              lastTriangleX[2] === verticeX[2] &&
+              lastTriangleY[0] === verticeY[0] &&
+              lastTriangleY[1] === verticeY[1] &&
+              lastTriangleY[2] === verticeY[2] &&
+              lastMouse === Mouse.Eraser) {
+              return;
+            }
+            lastTriangleX = verticeX;
+            lastTriangleY = verticeY;
+            lastMouse = Mouse.Eraser;
+            var newTri = new Float32Array(6);
+            for ( var i = 0; i < 3; i++ ) {
+              newTri[2*i] = 2*verticeX[i]/canvas.width-1;
+              newTri[2*i+1] = 2*(canvas.height-verticeY[i])/canvas.height-1;
+            }
+            for ( var i = 0; i < index / 3; i+=1 ) {
+              diff = false;
+              gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+              var oldTri = new Float32Array(6);
+              gl.getBufferSubData(gl.ARRAY_BUFFER, 24*i, oldTri, 0);
+              for ( var j = 0; j < 6; j++ ) {
+                if (oldTri[j] !== newTri[j]) {
+                  diff = true;
+                }
+              }
+              if (!diff) {
+                gl.bufferSubData(gl.ARRAY_BUFFER, 24*i, flatten([0,0,0,0,0,0]));
+                gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
+                gl.bufferSubData(gl.ARRAY_BUFFER, 48*i, flatten([0,0,0,0,0,0,0,0,0,0,0,0]));
+              }
+            }
+          }
+>>>>>>> Stashed changes
     } );
 
 
@@ -266,6 +298,7 @@ function render() {
 
 }
 
+<<<<<<< Updated upstream
 function draw(verticeX, verticeY) {
     for (var i = 0; i < 3; i++) {
         gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
@@ -288,3 +321,40 @@ function zoomer() {
     //gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
     //requestAnimFrame(render);
 }
+=======
+
+function getTriangle(event) {
+            const rect = canvas.getBoundingClientRect();
+            var reloX = event.clientX - rect.left;
+            var reloY = event.clientY - rect.top;
+            var squareX = reloX - (reloX%20) + 10;
+            var squareY = reloY - (reloY%20) + 10;
+            var verticeX = [];
+            var verticeY = [];
+            verticeX.push(squareX);
+            verticeY.push(squareY);
+
+            if (reloX - reloY > squareX - squareY) {
+              // up/right
+              verticeX.push(squareX + 10);
+              verticeY.push(squareY - 10);
+            }
+            else {
+              // down/left
+              verticeX.push(squareX - 10);
+              verticeY.push(squareY + 10);
+            }
+            if (reloX + reloY > squareX + squareY) {
+              // right/down
+              verticeX.push(squareX + 10);
+              verticeY.push(squareY + 10);
+            }
+            else {
+              // up/left
+              verticeX.push(squareX - 10);
+              verticeY.push(squareY - 10);
+            }
+
+            return [verticeX, verticeY]
+}
+>>>>>>> Stashed changes
