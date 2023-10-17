@@ -1,7 +1,12 @@
 var canvas;
 var gl;
 
+<<<<<<< Updated upstream
 var maxNumTriangles = 1000;
+=======
+
+var maxNumTriangles = 3000;
+>>>>>>> Stashed changes
 var maxNumVertices  = 3 * maxNumTriangles;
 var index = 0;
 
@@ -137,7 +142,7 @@ window.onload = function init() {
 
 
     gl.viewport( 0, 0, canvas.width, canvas.height );
-    gl.clearColor( 0.5, 0.5, 0.5, 1.0 );
+    gl.clearColor( 1, 0.9, 0.9, 1.0 );
 
 
     //
