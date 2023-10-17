@@ -67,6 +67,8 @@ var layer3 = 3;
 
 var chosenOne = 1;
 
+var finalLayer = [];
+
 function layer_1() {
     chosenOne = 1;
 }
@@ -208,13 +210,14 @@ function saveState() {
     redoTClone = [];
 }
 function undo_op() {
-    if (undoTClone.length > 0 && undoTClone.length < 10) {
+    if (undoTClone.length > 0) {
         var temp = indexHolder.pop();
         indexRedoer.push(temp);
         index = 0;
         var cloneTemp = undoTClone.pop()
         var popped = deepClone(cloneTemp);
         redoTClone.push(popped);
+        allVertices = deepClone(popped);
         lengthPopped = popped.length;
         colorChanger = 0;
         colorId = colorHolder[0];
@@ -473,7 +476,43 @@ function render() {
     window.requestAnimFrame(render);
 }
 
+function finalLayerDecider() {
+
+    finalLayer = [];
+    if (layer1 > layer2 && layer2 > layer3 )
+    {
+        finalLayer = layer1.concat(layer2.concat(layer3))
+    }
+    if (layer1 > layer2 && layer3 > layer2 )
+    {
+        finalLayer = layer1.concat(layer3.concat(layer2))
+    }
+    if (layer2 > layer2 && layer1 > layer3 )
+    {
+        finalLayer = layer2.concat(layer1.concat(layer3))
+    }
+    if (layer2 > layer2 && layer3 > layer1 )
+    {
+        finalLayer = layer2.concat(layer3.concat(layer1))
+    }
+    if (layer3 > layer2 && layer2 > layer1 )
+    {
+        finalLayer = layer3.concat(layer2.concat(layer1))
+    }
+    if (layer3 > layer2 && layer1 > layer2 )
+    {
+        finalLayer = layer3.concat(layer1.concat(layer2))
+    }
+}
+
+function finalDrawer() {
+    finalLayerDecider();
+    for (let i = 0; i < finalLayer.length; i++) { 
+        draw(finalLayer[i][0], finalLayer[i][1])
+    }
+}
 function draw(verticeX, verticeY) {
+
     for (var i = 0; i < 3; i++) {
         gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
         var t = vec2(2 * verticeX[i] / canvas.width - 1,
