@@ -1,9 +1,16 @@
 var canvas;
 var gl;
 
+<<<<<<< Updated upstream
 
 var maxNumTriangles = 30000;
+=======
+var maxNumTriangles = 3000;
+>>>>>>> Stashed changes
 var maxNumVertices = 3 * maxNumTriangles;
+
+var selectStartX;
+var selectStartY;
 
 var index = 0;
 var lastTriangleX = [];
@@ -41,8 +48,8 @@ var theta = 0.0;
 var phi = 0.0;
 var dr = 5.0 * Math.PI / 180.0;
 
-var modelViewMatrix
-var modelViewMatrixLoc
+var modelViewMatrix;
+var modelViewMatrixLoc;
 
 
 var colors = [
@@ -192,11 +199,15 @@ window.onload = function init() {
 
     canvas.addEventListener("mousedown", function(event){
       redraw = true;
+      mouseDownX = event.clientX;
+      mouseDownY = event.clientY;
+      
     });
 
     canvas.addEventListener("mouseup", function(event){
         redraw = false;
         saveState();
+        //line_index = 0;
     });
     indexHolder.push(0);
     colorHolder.push(0);
@@ -264,6 +275,19 @@ window.onload = function init() {
               }
             }
           }
+          else if(redraw && mouse === Mouse.Select) {                                                     // HERE
+            var mouseDown = new Float32Array(4);
+            mouseDown[0] = mouseDownX;
+            mouseDown[1] = mouseDownY;
+            var mouseCur = new Float32Array(2);
+            mouseDown[2] = event.clientX;
+            mouseDown[3] = event.clientY;
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+            gl.bufferSubData(gl.ARRAY_BUFFER, 8*(maxNumVertices + line_index), flatten(mouseDown));
+
+            line_index++;
+          }
     } );
 
     gl.viewport( 0, 0, canvas.width, canvas.height );
@@ -274,7 +298,6 @@ window.onload = function init() {
     //
     var program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
-
 
     vBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer);
@@ -305,7 +328,6 @@ function render() {
     gl.drawArrays( gl.TRIANGLES, 0, index );
 
     window.requestAnimFrame(render);
-
 }
 
 function draw(verticeX, verticeY) {
