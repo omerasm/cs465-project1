@@ -150,7 +150,7 @@ function redo_op() {
 }
 
 function zoom_in(){
-    fovy = fovy
+    fovy = fovy;
 }
 
 window.onload = function init() {
@@ -187,31 +187,13 @@ window.onload = function init() {
               return;
             }
             
-<<<<<<< Updated upstream
               draw(verticeX, verticeY);
               var vertice = [verticeX, verticeY];
               allVertices.push(vertice);
               
-=======
-            for (var i = 0; i < 3; i++) {
-              gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-              var t = vec2(2*verticeX[i]/canvas.width-1,
-              2*(canvas.height-verticeY[i])/canvas.height-1);
-              gl.bufferSubData(gl.ARRAY_BUFFER, 8*index, flatten(t));
-              gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
-              t = vec4(colors[colorId]);
-              gl.bufferSubData(gl.ARRAY_BUFFER, 16*index, flatten(t));
-              index++;
-            }
->>>>>>> Stashed changes
-
             lastTriangleX = verticeX;
             lastTriangleY = verticeY;
             lastColorId = colorId;
-<<<<<<< Updated upstream
-        }
-
-=======
             lastMouse = Mouse.Brush;
           }
           else if(redraw && mouse === Mouse.Eraser) {
@@ -251,13 +233,10 @@ window.onload = function init() {
               }
             }
           }
->>>>>>> Stashed changes
     } );
-
 
     gl.viewport( 0, 0, canvas.width, canvas.height );
     gl.clearColor( 1, 0.9, 0.9, 1.0 );
-
 
     //
     //  Load shaders and initialize attribute buffers
@@ -298,7 +277,6 @@ function render() {
 
 }
 
-<<<<<<< Updated upstream
 function draw(verticeX, verticeY) {
     for (var i = 0; i < 3; i++) {
         gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
@@ -321,7 +299,6 @@ function zoomer() {
     //gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
     //requestAnimFrame(render);
 }
-=======
 
 function getTriangle(event) {
             const rect = canvas.getBoundingClientRect();
@@ -357,4 +334,3 @@ function getTriangle(event) {
 
             return [verticeX, verticeY]
 }
->>>>>>> Stashed changes
