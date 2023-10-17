@@ -12,6 +12,7 @@ var selectEndY;
 var selectionMade = false;
 
 var indexrez;
+var dragging = false;
 
 var dragStartX;
 var dragStartY;
@@ -287,6 +288,7 @@ window.onload = function init() {
           selectStartY = event.clientY;
         }
         else {
+          dragging = true;
           dragStartX = event.clientX;
           dragStartY = event.clientY;
         }
@@ -296,16 +298,12 @@ window.onload = function init() {
     canvas.addEventListener("mouseup", function(event){
         redraw = false;
         saveState();
-        if(mouse === Mouse.Select) {
+        if(mouse === Mouse.Select && !selectionMade) {
           selectEndX = event.clientX;
           selectEndY = event.clientY;
 
           // find square center
           const rect = canvas.getBoundingClientRect();
-          var reloX = selectEndX - rect.left;
-          var reloY = selectEndY - rect.top;
-          //var squareX = reloX - (reloX%20) + 10;
-          //var squareY = reloY - (reloY%20) + 10;
 
           var normalStartX = 2*(selectStartX - rect.left)/canvas.width-1;
           var normalStartY = 2*(canvas.height-(selectStartY - rect.top))/canvas.height-1;
@@ -336,18 +334,26 @@ window.onload = function init() {
                     gl.getBufferSubData(gl.ARRAY_BUFFER, 48*i, oldTriColor, 0);
                     gl.bufferSubData(gl.ARRAY_BUFFER, 48*i, flatten([0,0,0,0,0,0,0,0,0,0,0,0]));
 
+                    var oldTriColorPortion = new Float32Array(4);
+                    for (var k = 0; k < 4; k++) {
+                      oldTriColorPortion[k] = oldTriColor[k];
+                    }
                     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
                     gl.bufferSubData(gl.ARRAY_BUFFER, 8*index, oldTri);
                     gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
                     gl.bufferSubData(gl.ARRAY_BUFFER, 16*index, oldTriColor);
                     index += 3;
                     selectionMade = true;
-                    console.log("here");
+                    console.log(oldTri);
                     break;
                   }
                 }
               }
               //
+            }
+            else if(mouse === Mouse.Select && dragging) {
+              selectionMade = false;
+              dragging = false;
             }
     });
     indexHolder.push(0);
@@ -356,7 +362,7 @@ window.onload = function init() {
     //canvas.addEventListener("mousedown", function(){
     canvas.addEventListener("mousemove", function(event){
 
-          if ( selectionMade && mouse === Mouse.Select ) {
+          if ( dragging && selectionMade && mouse === Mouse.Select ) {
             dragEndX = event.clientX;
             dragEndY = event.clientY;
 
@@ -368,8 +374,8 @@ window.onload = function init() {
             for ( var curpt = indexrez; curpt < index; curpt += 1 ) {
               var vec = new Float32Array(2);
               gl.getBufferSubData(gl.ARRAY_BUFFER, 8*curpt, vec, 0);
-              vec[0] += dragUnitX*20;
-              vec[1] += dragUnitY*20;
+              vec[0] += dragUnitX*1/450;
+              vec[1] -= dragUnitY*1/450;
               gl.bufferSubData(gl.ARRAY_BUFFER, 8*curpt, vec);
             }
             
