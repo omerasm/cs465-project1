@@ -71,8 +71,12 @@ window.onload = function init() {
 
             const rect = canvas.getBoundingClientRect();
             // center of the square we are in
-            var squareX = event.clientX - (event.clientX%20) + 10 - rect.left;
-            var squareY = event.clientY - (event.clientY%20) + 10 - rect.top;
+
+            var reloX = event.clientX - rect.left;
+            var reloY = event.clientY - rect.top;
+
+            var squareX = reloX - (reloX%20) + 10;
+            var squareY = reloY - (reloY%20) + 10;
 
             var verticeX = [];
             var verticeY = [];
@@ -80,7 +84,7 @@ window.onload = function init() {
             verticeX.push(squareX);
             verticeY.push(squareY);
 
-            if (event.clientX - event.clientY > squareX - squareY) 
+            if (reloX - reloY > squareX - squareY) 
             {
               // up/right
               verticeX.push(squareX + 10);
@@ -91,7 +95,7 @@ window.onload = function init() {
               verticeX.push(squareX - 10);
               verticeY.push(squareY + 10);
             }
-            if (event.clientX + event.clientY > squareX + squareY)
+            if (reloX + reloY > squareX + squareY)
             {
               // right/down
               verticeX.push(squareX + 10);
@@ -122,15 +126,12 @@ window.onload = function init() {
               t = vec4(colors[colorId]);
               gl.bufferSubData(gl.ARRAY_BUFFER, 16*index, flatten(t));
               index++;
-              
             }
 
             lastTriangleX = verticeX;
             lastTriangleY = verticeY;
             lastColorId = colorId;
 
-            console.log();
-            console.log("*****************");
           }
 
     } );
