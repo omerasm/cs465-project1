@@ -11,8 +11,7 @@ var index = 0;
 var lastTriangleX = [];
 var lastTriangleY = [];
 var lastColorId;
-
-var color = 0;
+var colorId = 0;
 
 var redraw = false;
 
@@ -23,8 +22,31 @@ var colors = [
     vec4( 0.0, 1.0, 0.0, 1.0 ),  // green
     vec4( 0.0, 0.0, 1.0, 1.0 ),  // blue
     vec4( 1.0, 0.0, 1.0, 1.0 ),  // magenta
-    vec4( 0.0, 1.0, 1.0, 1.0 )   // cyan
 ];
+
+function buttonBlack() {
+    colorId = 0;
+}
+
+function buttonRed() {
+    colorId = 1;
+}
+
+function buttonYellow() {
+    colorId = 2;
+}
+
+function buttonGreen() {
+    colorId = 3;
+}
+
+function buttonBlue() {
+    colorId = 4;
+}
+
+function buttonMagenta() {
+    colorId = 5;
+}
 
 
 window.onload = function init() {
@@ -47,9 +69,10 @@ window.onload = function init() {
 
           if(redraw) {
 
+            const rect = canvas.getBoundingClientRect();
             // center of the square we are in
-            var squareX = event.clientX - (event.clientX%20) + 10;
-            var squareY = event.clientY - (event.clientY%20) + 10;
+            var squareX = event.clientX - (event.clientX%20) + 10 - rect.left;
+            var squareY = event.clientY - (event.clientY%20) + 10 - rect.top;
 
             var verticeX = [];
             var verticeY = [];
